@@ -169,7 +169,7 @@ Dataset `LabelledRice` (3.355 gambar) tidak digunakan selama training/validasi.
 ## 8. Feature Importance (XGBoost)
 
 Top-20 fitur dari 960 dimensi yang paling berkontribusi ditampilkan dalam diagram batang horizontal:
-![Feature importance XGBoost](xgboost_feature_importance.png)
+(xgboost_feature_importance.png)
 
 ---
 
