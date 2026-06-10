@@ -61,12 +61,10 @@ Gambar memiliki variasi resolusi. Histogram disimpan di `eda_ukuran_train.png`, 
 ### 3.5 Resize ke 224×224
 Semua gambar diubah ukuran menjadi 224×224 menggunakan `Image.BILINEAR`, disimpan ke `dataset_subset/train_resized`, `validation_resized`, `labelled_resized`.
 
-### 3.6 Augmentasi Data (hanya untuk training)
-Menggunakan `ImageDataGenerator` dengan `rotation_range=20`, `horizontal_flip=True`, `zoom_range=0.15`, `fill_mode='nearest'`. Data validasi dan uji tidak diaugmentasi.
 
 ---
 
-## 4. Ekstraksi Fitur dengan MobileNetV3Large
+## 4. Ekstraksi Fitur dengan MobileNetV3Large dan Normalisasi
 
 - **Model**: `MobileNetV3Large` dengan bobot ImageNet, `include_top=False`, `pooling='avg'`.
 - **Output fitur**: 960 dimensi.
@@ -82,19 +80,19 @@ Classifier dilatih pada fitur `X_train` dan label `y_train`.
 
 | Model | Konfigurasi |
 |-------|-------------|
-| **MLP** | 3 hidden layer (512,256,128), ReLU, Adam, early stopping, StandardScaler |
-| **Random Forest** | 300 trees, max_depth=None, n_jobs=-1 |
-| **SVM** | Kernel RBF, C=10, gamma='scale', StandardScaler |
-| **XGBoost** | 300 estimators, max_depth=6, lr=0.1, subsample=0.8, colsample=0.8 |
+| **MLP** | 3 hidden layer (1024, 512,256), ReLU, Adam, early stopping, StandardScaler |
+| **Random Forest** | 100 trees, max_depth=None, n_jobs=-1 |
+| **SVM** | Kernel RBF, C=1.0, gamma='scale', StandardScaler |
+| **XGBoost** | 100 estimators, max_depth=4, lr=0.05, subsample=0.7, colsample=0.7 |
 
 **Hasil training:**
 
 | Classifier    | Train Acc | Val Acc | Waktu (s) |
 |---------------|-----------|---------|-----------|
-| XGBoost       | 1.0000    | 0.4329  | 44.8      |
-| Random Forest | 1.0000    | 0.4289  | 1.3       |
-| SVM           | 0.8519    | 0.4106  | 7.5       |
-| MLP           | 0.4788    | 0.3841  | 2.7       |
+| XGBoost       | 0.8988    | 0.4126  | 7.6       |
+| Random Forest | 0.9762    | 0.4126  | 0.4       |
+| SVM           | 0.6138    | 0.4268  | 6.5       |
+| MLP           | 0.8219    | 0.4472  | 11.1      |
 
 ---
 
@@ -103,40 +101,41 @@ Classifier dilatih pada fitur `X_train` dan label `y_train`.
 ### 6.1 Classification Report per Model
 
 **MLP**
-| Kelas      | Precision | Recall | F1-score | Support |
-|------------|-----------|--------|----------|---------|
-| BrownSpot  | 0.4800    | 0.4878 | 0.4839   | 123     |
-| Healthy    | 0.3164    | 0.4553 | 0.3733   | 123     |
-| Hispa      | 0.3492    | 0.3577 | 0.3534   | 123     |
-| LeafBlast  | 0.4531    | 0.2358 | 0.3102   | 123     |
-| **Macro avg** | 0.3997 | 0.3841 | 0.3802   | 492     |
+| Kelas       | Precision | Recall | F1-score | Support |
+|-------------|-----------|--------|----------|---------|
+| BrownSpot   | 0.6034    | 0.5691 | 0.5858   | 123     |
+| Healthy     | 0.3133    | 0.2114 | 0.2524   | 123     |
+| Hispa       | 0.4188    | 0.5447 | 0.4735   | 123     |
+| LeafBlast   | 0.4286    | 0.4634 | 0.4453   | 123     |
+| **Macro avg** | 0.4410  | 0.4472 | 0.4393   | 492     |
 
 **Random Forest**
-| Kelas      | Precision | Recall | F1-score | Support |
-|------------|-----------|--------|----------|---------|
-| BrownSpot  | 0.5152    | 0.5528 | 0.5333   | 123     |
-| Healthy    | 0.3750    | 0.3415 | 0.3574   | 123     |
-| Hispa      | 0.4028    | 0.4715 | 0.4345   | 123     |
-| LeafBlast  | 0.4135    | 0.3496 | 0.3789   | 123     |
-| **Macro avg** | 0.4266 | 0.4289 | 0.4260   | 492     |
+| Kelas       | Precision | Recall | F1-score |
+|-------------|-----------|--------|----------|
+| BrownSpot   | 0.5036    | 0.5610 | 0.5308   |
+| Healthy     | 0.3917    | 0.3821 | 0.3868   |
+| Hispa       | 0.3481    | 0.3821 | 0.3643   |
+| LeafBlast   | 0.4000    | 0.3252 | 0.3587   |
+| **Macro avg** | 0.4109  | 0.4126 | 0.4102   |
+
 
 **SVM**
-| Kelas      | Precision | Recall | F1-score | Support |
-|------------|-----------|--------|----------|---------|
-| BrownSpot  | 0.5481    | 0.6016 | 0.5736   | 123     |
-| Healthy    | 0.3232    | 0.2602 | 0.2883   | 123     |
-| Hispa      | 0.3609    | 0.3902 | 0.3750   | 123     |
-| LeafBlast  | 0.3840    | 0.3902 | 0.3871   | 123     |
-| **Macro avg** | 0.4041 | 0.4106 | 0.4060   | 492     |
+| Kelas       | Precision | Recall | F1-score |
+|-------------|-----------|--------|----------|
+| BrownSpot   | 0.4926    | 0.5447 | 0.5174   |
+| Healthy     | 0.3723    | 0.2846 | 0.3226   |
+| Hispa       | 0.4014    | 0.4797 | 0.4370   |
+| LeafBlast   | 0.4261    | 0.3984 | 0.4118   |
+| **Macro avg** | 0.4231  | 0.4268 | 0.4222   |
 
 **XGBoost**
-| Kelas      | Precision | Recall | F1-score | Support |
-|------------|-----------|--------|----------|---------|
-| BrownSpot  | 0.5645    | 0.5691 | 0.5668   | 123     |
-| Healthy    | 0.3864    | 0.4146 | 0.4000   | 123     |
-| Hispa      | 0.3864    | 0.4146 | 0.4000   | 123     |
-| LeafBlast  | 0.3942    | 0.3333 | 0.3612   | 123     |
-| **Macro avg** | 0.4329 | 0.4329 | 0.4320   | 492     |
+| Kelas       | Precision | Recall | F1-score |
+|-------------|-----------|--------|----------|
+| BrownSpot   | 0.5175    | 0.6016 | 0.5564   |
+| Healthy     | 0.3495    | 0.2927 | 0.3186   |
+| Hispa       | 0.3529    | 0.4390 | 0.3913   |
+| LeafBlast   | 0.4194    | 0.3171 | 0.3611   |
+| **Macro avg** | 0.4098  | 0.4126 | 0.4068   |
 
 ### 6.2 Confusion Matrix Validation
 (hasil_confusion_matrix.png)
@@ -148,11 +147,11 @@ Classifier dilatih pada fitur `X_train` dan label `y_train`.
 Dataset `LabelledRice` (3.355 gambar) tidak digunakan selama training/validasi.
 
 | Classifier    | Val Acc | Val F1 | Ext Acc | Ext F1 | Gap Acc |
-|---------------|---------|--------|---------|--------|---------|
-| XGBoost       | 0.4329  | 0.4320 | 0.6855  | 0.6919 | -0.2526 |
-| Random Forest | 0.4289  | 0.4260 | 0.6793  | 0.6841 | -0.2504 |
-| SVM           | 0.4106  | 0.4060 | 0.5997  | 0.6053 | -0.1891 |
-| MLP           | 0.3841  | 0.3802 | 0.4349  | 0.4119 | -0.0507 |
+|-|-|-|-|-|-|---|---------|--------|---------|--------|---------|
+| MLP           |  0.4472 | 0.4393 | 0.5800  | 0.5920 | -0.1329 |
+| SVM           | 0.4268  | 0.4222 | 0.4808  | 0.4802 | -0.0539 |
+| Random Forest | 0.4126  | 0.4102 | 0.6650  | 0.6677 | -0.2524 |
+| XGBoost       | 0.4126  | 0.4068 | 0.6244  | 0.6272 | -0.2118 |
 
 **Catatan**: Gap negatif menunjukkan performa pada data eksternal lebih tinggi dari validasi, kemungkinan disebabkan oleh perbedaan distribusi kelas antara validation set (seimbang, 123/kelas) dan LabelledRice (tidak seimbang, didominasi kelas Healthy sebanyak 1488 gambar dari 3355).
 
